@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "scheduler.h"
 #include "Software_Timer.h"
 /* USER CODE END Includes */
 
@@ -63,10 +64,27 @@ static void MX_TIM2_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+void ledtest(){
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		}
+		void led1test(){
+			HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+		}
+		void led2test(){
+			HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+		}
+		void led3test(){
+			HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+		}
+		void led4test(){
+			HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
+		}
+
 int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+
 
   /* USER CODE END 1 */
 
@@ -95,13 +113,14 @@ HAL_TIM_Base_Start_IT(&htim2);
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-setTimer(1000, 0);
+SCH_Add_Task(ledtest,  100, 200);
+SCH_Add_Task(led1test, 100, 400);
+SCH_Add_Task(led2test, 100, 800);
+SCH_Add_Task(led3test, 100, 1600);
+SCH_Add_Task(led4test, 500, 0);
   while (1)
   {
-	  if(timer_flag[0]==1){
-		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		  setTimer(1000, 0);
-	  }
+	  SCH_Dispatch_Tasks();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -205,14 +224,17 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_Pin|LED1_Pin|LED2_Pin|LED3_Pin
+                          |LED4_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
+  /*Configure GPIO pins : LED_Pin LED1_Pin LED2_Pin LED3_Pin
+                           LED4_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|LED1_Pin|LED2_Pin|LED3_Pin
+                          |LED4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -220,7 +242,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	timerRun();
+	SCH_Update();
 }
 /* USER CODE END 4 */
 
